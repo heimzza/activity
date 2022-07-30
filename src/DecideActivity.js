@@ -5,7 +5,7 @@ class DecideActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            longitude:0,
+            latitude: 0,
             error: ''
         };
     }
@@ -14,36 +14,76 @@ class DecideActivity extends Component {
     //     longitude: 0
     // }
 
+    decideActivity(lat) {
+
+        const currentMonth = new Date().getMonth();
+        const summer = {
+            text: 'Yüzmeye gidebilirsin',
+            iconName: 'sun'
+        }
+        const winter = {
+            text: 'Kayağa gidebilirsin',
+            iconName: 'snowflake'
+        }
+        
+        if (lat < 0) {
+            // güney yarımküre
+
+            if (currentMonth < 3 || currentMonth > 9) {
+                return summer;
+            } else {
+                return winter;
+            }
+        } else {
+            // kuzey yarımküre
+
+            if (currentMonth < 3 || currentMonth > 9) {
+                return winter;
+            } else {
+                return summer;
+            }
+        }
+    }
+
     render() {
-        window.navigator.geolocation.getCurrentPosition((position) => {
-            console.log(position);
-            this.setState({
-               longitude: position.coords.longitude
-            });
-        },
-        (err) => {
-            console.log(err);
-            this.setState({
-               error: err.message
-            });
-        });
+        const { latitude, error } = this.state;
+        console.log(this.decideActivity(latitude));
 
-        const{longitude, error} = this.state;
+        window.navigator.geolocation.getCurrentPosition(
+            (position) => {
+                console.log(position);
+                this.setState({
+                    latitude : position.coords.latitude
+                });
+            },
+            (err) => {
+                console.log(err);
+                this.setState({
+                    error : "Kullanıcı Lokasyon erişimi vermedi!"
+                });
+            }
+        );
 
-        if (longitude !== 0 && !error) {
-            return(
+        if (latitude !== 0 && !error) {
+            const activity = this.decideActivity(latitude);
+            return (
                 <div>
-                    Boylam : {longitude}
+                    <h2 className="ui header">
+                        <i className={`${activity.iconName} outline icon`}></i>
+                        <div className="content">
+                            {activity.text}
+                        </div>
+                    </h2>
                 </div>
             )
-        }else if (longitude === 0 && error) {
-            return(
+        } else if (latitude === 0 && error) {
+            return (
                 <div>
                     Hata : {error}
                 </div>
             )
-        }else{
-            return(
+        } else {
+            return (
                 <div>
                     Yükleniyor...
                 </div>
